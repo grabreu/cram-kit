@@ -42,6 +42,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 - This is a Claude Code skill, not a standalone app: `.claude/skills/cram-kit/SKILL.md` holds the instructions Claude follows; `scripts/` holds the bundled Python for the mechanical parts (content hashing, cache read/write, HTML templating). Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
+- Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering.
 
 ### Caching
 
@@ -56,6 +57,5 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 ### Open Questions
 
-- TODO: exact skill invocation shape (slash commands vs. natural language)
 - TODO: HTML/CSS print template design
 - TODO: how the kids actually access/run this (Claude Code terminal vs. Claude app)
