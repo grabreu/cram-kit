@@ -19,6 +19,7 @@ A Claude Code skill that turns study text/topics into cached summaries, flashcar
 - Do not create commits unless explicitly requested.
 - Do not push unless explicitly requested.
 - Keep commits focused on the requested change.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`type: summary`).
 
 ## Documentation
 
