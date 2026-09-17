@@ -1,6 +1,6 @@
 ---
 name: cram-kit
-description: Turn study text/topics/images into a cached summary and flashcards, as printable HTML. Invoke as `/cram-kit <path-to-file>`, or with pasted text, a short phrase, or an image directly.
+description: Turn study text/topics/images into a cached summary and flashcards, or an interactive quiz, as printable HTML. Invoke as `/cram-kit <path-to-file>` (or `/cram-kit quiz <path-to-file>`), or with pasted text, a short phrase, or an image directly.
 ---
 
 # Cram Kit
@@ -49,3 +49,26 @@ Never regenerate summary/flashcards for an input the script already reported as 
 ## Regenerating on request
 
 If the user says they didn't like a previous result and asks for it to be redone, skip `check` (or ignore a cache hit): read the input again, generate new content, and run `save` directly. `save` always overwrites whatever was cached for that input, so no separate cleanup step is needed.
+
+## Quiz
+
+If the invocation starts with the word "quiz" (e.g. `/cram-kit quiz <path>`, or "quiz" plus pasted text/phrase/image), run an interactive quiz instead of the normal summary/flashcards flow:
+
+1. Resolve the input to a file path first: if there's no existing file, follow "If you don't have a file path yet" above using the content after "quiz". If there's an existing file, follow "Given a file path" above as normal (generate and cache summary/flashcards on a miss, same as any other invocation) — a quiz always needs a summary/flashcards to draw from.
+2. Once summary/flashcards exist (cached or freshly generated), load them:
+
+       python scripts/cram.py load <path>
+
+   This prints the cached `{"summary": ..., "flashcards": ..., "set_tag": ...}` as JSON — don't regenerate this content, just read it.
+3. Generate a set of quiz questions from that content (mix of multiple-choice, open-ended, and true/false, unless the user's extra instructions say otherwise — the same "extra instructions alongside a path" handling above applies here too). Work out the correct answer for each question yourself, but don't reveal any of them yet.
+
+   There is no fixed question count and no natural end. If the user asked for a specific number upfront (e.g. "30 questions"), stop after that many. Otherwise, keep going until the user says they're done (e.g. "chega", "só isso", "pode parar") — don't stop after some default number on your own. Either way, once the underlying content runs out of distinct facts to ask about, reuse the same facts across further questions, rephrased differently each time (different wording, different question type, a different angle on the same fact) rather than stopping. Repeated exposure to the same material in varied forms is the point of "cram" — it's not a flaw to avoid.
+4. Ask ONE question at a time in the chat, then stop and wait for the user's reply — don't ask the next question until they've answered the current one.
+5. After each answer: judge it (for open-ended answers, judge whether the meaning is close enough, not an exact string match), give brief feedback and the correct answer, then either move to the next question or, if the user has signaled they're done, proceed to the recap below.
+6. Once the quiz ends (count reached, or the user said to stop), write a JSON file capturing every question asked so far, shaped `{"questions": [{"type": ..., "question": ..., "options": [...], "correct_answer": ..., "user_answer": ..., "correct": true/false, "explanation": ...}, ...], "set_tag": ...}` (`options` only for multiple-choice, `explanation` optional), then run:
+
+       python scripts/cram.py quiz-save <path> <json-file>
+
+7. Report the quiz recap HTML path and a quick score summary (e.g. "4/6 correct") in chat.
+
+Quiz results are never cached — `quiz-save` doesn't touch `.cache/` at all, only `check`/`save` do.

@@ -21,6 +21,12 @@ Also accepts pasted text, a short topic phrase, or an image directly — no exis
 /cram-kit Explain the water cycle
 ```
 
+For a quiz instead of a summary, add `quiz` — an interactive, one-question-at-a-time session in chat, with a printable recap (score + answer key) written at the end:
+
+```shell
+/cram-kit quiz <path-to-file>
+```
+
 ## Development
 
 Requires Python 3.11+.

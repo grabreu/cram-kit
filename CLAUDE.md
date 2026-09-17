@@ -42,7 +42,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Source
 
 - `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
-- `scripts/cram.py` - CLI entry point with two subcommands: `check` (hash the input, render from cache on a hit, or report a miss) and `save` (write Claude-generated content to cache and render).
+- `scripts/cram.py` - CLI entry point with four subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz generation), and `quiz-save` (render a quiz recap HTML, never touches the cache).
 - `scripts/cache.py` - content hashing and cache read/write.
 - `scripts/render.py` - HTML templating.
 
@@ -51,6 +51,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - This is a Claude Code skill, not a standalone app. Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
 - Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering. Also accepts pasted text or a short phrase directly (no existing file): Claude saves it as a file in the current working directory first, then proceeds the same way. An image pasted directly into the chat has no accessible source file, so it's transcribed to text instead of saved as-is — only an image given as an actual file path goes through the pipeline as an image.
+- `/cram-kit quiz <path-to-file>` (leading "quiz" keyword) triggers the quiz flow instead of summary/flashcards generation.
 
 ### Caching
 
@@ -59,6 +60,15 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - Quiz questions are never cached — always regenerated fresh.
 - Regenerating on request (user didn't like a result) bypasses the cache check and overwrites the existing entry for that input.
 - Style guidance passed alongside new content (no file yet) is saved as part of the same input text, so it naturally busts the cache key. Guidance passed alongside an existing file path is applied only to that run's generation and not persisted anywhere.
+
+### Quiz
+
+- The one interactive piece of the skill — everything else (summary, flashcards) is static printable HTML; quiz is a live, one-question-at-a-time back-and-forth in chat, with feedback given immediately after each answer.
+- Requires summary/flashcards to already exist for the input (generated first if missing) — quiz questions are drawn from that content, never from the raw input directly.
+- Question types: multiple-choice, open-ended, and true/false, mixed unless the user requests otherwise.
+- No fixed question count or natural end: continues until a user-requested count is reached or the user says to stop. Once distinct facts run out, later questions rephrase the same facts differently rather than ending — repeated exposure is the intent of "cram," not a flaw.
+- Never cached — regenerated fresh every time, and `quiz-save` doesn't touch `.cache/` at all.
+- After the last question, a recap HTML (`<set_tag>-quiz.html`) is written: every question, the user's answer, the correct answer, and whether they got it right — this is the answer-key equivalent for quiz, produced after the fact rather than upfront.
 
 ### Content & Tooling
 
