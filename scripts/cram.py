@@ -14,8 +14,7 @@ def _render_and_write(input_path: Path, data: dict) -> None:
 
 
 def cmd_check(input_path: Path) -> None:
-    text = input_path.read_text(encoding="utf-8")
-    digest = content_hash(text)
+    digest = content_hash(input_path.read_bytes())
     cached = read_cache(digest)
 
     if cached is not None:
@@ -28,8 +27,7 @@ def cmd_check(input_path: Path) -> None:
 
 
 def cmd_save(input_path: Path, json_path: Path) -> None:
-    text = input_path.read_text(encoding="utf-8")
-    digest = content_hash(text)
+    digest = content_hash(input_path.read_bytes())
     generated = json.loads(json_path.read_text(encoding="utf-8"))
 
     data = {

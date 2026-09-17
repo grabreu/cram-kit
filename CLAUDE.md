@@ -50,13 +50,14 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 - This is a Claude Code skill, not a standalone app. Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
-- Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering.
+- Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering. Also accepts pasted text or a short phrase directly (no existing file): Claude saves it as a file in the current working directory first, then proceeds the same way. An image pasted directly into the chat has no accessible source file, so it's transcribed to text instead of saved as-is — only an image given as an actual file path goes through the pipeline as an image.
 
 ### Caching
 
-- Summary and flashcards are generated together in the same pass and cached, keyed by the input's content hash.
+- Summary and flashcards are generated together in the same pass and cached, keyed by the input's content hash (raw bytes, not decoded text — works for images too).
 - Summary shape: `{title, sections: [{heading, body, tip?}]}` — `tip` is optional per section, only included where there's an actual memorable shortcut.
 - Quiz questions are never cached — always regenerated fresh.
+- Regenerating on request (user didn't like a result) bypasses the cache check and overwrites the existing entry for that input.
 
 ### Content & Tooling
 
