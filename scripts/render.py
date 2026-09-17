@@ -1,4 +1,9 @@
-def render_summary_html(content: str, set_tag: str) -> str:
+def render_html(summary: str, flashcards: list[dict], set_tag: str) -> str:
+    cards_html = "\n".join(
+        f"<div><p><strong>Q:</strong> {card['front']}</p>"
+        f"<p><strong>A:</strong> {card['back']}</p></div>"
+        for card in flashcards
+    )
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +11,10 @@ def render_summary_html(content: str, set_tag: str) -> str:
 <title>{set_tag}</title>
 </head>
 <body>
-<pre>{content}</pre>
+<h1>Summary</h1>
+<pre>{summary}</pre>
+<h1>Flashcards</h1>
+{cards_html}
 </body>
 </html>
 """
