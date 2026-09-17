@@ -15,6 +15,10 @@ If invoked with pasted text, a short topic phrase, or an image instead of a file
 2. Tell the user which file you created, so they know where their input is saved.
 3. Continue with that file's path exactly as described below.
 
+## Extra instructions alongside a path
+
+The invocation may include a file path plus trailing guidance in the same message (e.g. "myfile.txt, be more direct and give me only 2 flashcards"). Split the path from the guidance yourself, then apply the guidance only to this run's generation step — don't save it into the input file, and don't let it change the `set_tag`.
+
 ## Given a file path
 
 Run from the repo root:

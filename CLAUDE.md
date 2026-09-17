@@ -58,6 +58,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - Summary shape: `{title, sections: [{heading, body, tip?}]}` — `tip` is optional per section, only included where there's an actual memorable shortcut.
 - Quiz questions are never cached — always regenerated fresh.
 - Regenerating on request (user didn't like a result) bypasses the cache check and overwrites the existing entry for that input.
+- Style guidance passed alongside new content (no file yet) is saved as part of the same input text, so it naturally busts the cache key. Guidance passed alongside an existing file path is applied only to that run's generation and not persisted anywhere.
 
 ### Content & Tooling
 
@@ -70,5 +71,4 @@ Run `ruff format --check .`, `ruff check .` before considering a change done —
 
 ### Open Questions
 
-- TODO: how the kids actually access/run this (Claude Code terminal vs. Claude app)
-- TODO: allow passing generation style guidance (e.g. "be more direct", "more detailed") alongside the path — the cache key is currently just the input's content hash, so this needs a decision on whether guidance busts the cache key or just bypasses the cache for that run
+- TODO: whether the kids' actual environment is Claude Code (where `SKILL.md` works today) or the Claude app — skills as built here are a Claude Code mechanism and may not carry over
