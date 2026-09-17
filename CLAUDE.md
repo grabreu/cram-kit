@@ -2,7 +2,7 @@
 
 ## Repository
 
-A Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML. Read `README.md` before making changes.
+A Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML. Read `README.md` before making changes — it documents the project pitch and usage.
 
 ## General Rules
 
@@ -39,9 +39,16 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 ## Project-Specific Guidelines
 
+### Source
+
+- `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
+- `scripts/cram.py` - CLI entry point: reads the input file, checks the cache, writes the output HTML.
+- `scripts/cache.py` - content hashing and cache read/write.
+- `scripts/render.py` - HTML templating.
+
 ### Architecture
 
-- This is a Claude Code skill, not a standalone app: `.claude/skills/cram-kit/SKILL.md` holds the instructions Claude follows; `scripts/` holds the bundled Python for the mechanical parts (content hashing, cache read/write, HTML templating). Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
+- This is a Claude Code skill, not a standalone app. Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
 - Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering.
 
@@ -53,8 +60,11 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Content & Tooling
 
 - Real study content and generated cache/output are personal — never commit them (see `.gitignore`).
-- Python: format/lint with `ruff`.
 - Not a publishable package: no `CONTRIBUTING.md`/`SECURITY.md`.
+
+### Validation
+
+Run `ruff format --check .`, `ruff check .` before considering a change done — CI (`.github/workflows/ci.yml`) runs the same on push/PR to `main`.
 
 ### Open Questions
 
