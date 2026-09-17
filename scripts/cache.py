@@ -24,3 +24,12 @@ def read_cache(digest: str) -> dict | None:
 def write_cache(digest: str, data: dict) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_path(digest).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def list_cache() -> list[dict]:
+    if not CACHE_DIR.exists():
+        return []
+    return [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(CACHE_DIR.glob("*.json"))
+    ]

@@ -1,6 +1,6 @@
 ---
 name: cram-kit
-description: Turn study text/topics/images into a cached summary and flashcards, an interactive quiz, or a printable practice activity, as HTML. Invoke as `/cram-kit <path-to-file>` (or `/cram-kit quiz <path-to-file>`, or `/cram-kit activity <path-to-file>`), or with pasted text, a short phrase, or an image directly.
+description: Turn study text/topics/images into a cached summary and flashcards, an interactive quiz, or a printable practice activity, as HTML. Invoke as `/cram-kit <path-to-file>` (or `/cram-kit quiz <path-to-file>`, or `/cram-kit activity <path-to-file>`), with pasted text, a short phrase, or an image directly, or `/cram-kit list` to see what's already been generated.
 ---
 
 # Cram Kit
@@ -93,3 +93,11 @@ If the invocation starts with the word "activity" (e.g. `/cram-kit activity <pat
 5. Report the output HTML path back to the user. For a subjective activity, also mention that it has no answer key and offer to review what they write once they're done (a real person or an AI review is what grades it, not this script).
 
 Activities are never cached — `activity-save` doesn't touch `.cache/` at all, and re-running produces a fresh set of exercises/prompts each time, same reasoning as quiz.
+
+## List
+
+If the invocation is exactly the word "list" (e.g. `/cram-kit list`), run from the repo root:
+
+    python scripts/cram.py list
+
+This prints every cached study set — Set tag, input file path, and the date it was generated — one per line. No input to resolve, no generation, no caching involved. Report the results back to the user as a readable list; if it prints "no study sets generated yet," say so plainly rather than treating it as an error.

@@ -42,7 +42,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Source
 
 - `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
-- `scripts/cram.py` - CLI entry point with five subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz/activity generation), `quiz-save` (render a quiz recap HTML, never touches the cache), and `activity-save` (render a practice activity HTML, never touches the cache).
+- `scripts/cram.py` - CLI entry point with six subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz/activity generation), `quiz-save` (render a quiz recap HTML, never touches the cache), `activity-save` (render a practice activity HTML, never touches the cache), and `list` (print every cached study set's tag, input path, and generation date).
 - `scripts/cache.py` - content hashing and cache read/write.
 - `scripts/render.py` - HTML templating.
 
@@ -53,10 +53,11 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering. Also accepts pasted text or a short phrase directly (no existing file): Claude saves it as a file in the current working directory first, then proceeds the same way. An image pasted directly into the chat has no accessible source file, so it's transcribed to text instead of saved as-is — only an image given as an actual file path goes through the pipeline as an image.
 - `/cram-kit quiz <path-to-file>` (leading "quiz" keyword) triggers the quiz flow instead of summary/flashcards generation.
 - `/cram-kit activity <path-to-file>` (leading "activity" keyword) triggers a printable practice activity instead.
+- `/cram-kit list` (no path) prints every cached study set.
 
 ### Caching
 
-- Summary and flashcards are generated together in the same pass and cached, keyed by the input's content hash (raw bytes, not decoded text — works for images too).
+- Summary and flashcards are generated together in the same pass and cached, keyed by the input's content hash (raw bytes, not decoded text — works for images too). Each cache entry also records `input_path` (resolved to absolute) and `generated_at` (a UTC date), so `list` can show where each study set's source file lives without needing a separate index.
 - Summary shape: `{title, sections: [{heading, body, tip?}]}` — `tip` is optional per section, only included where there's an actual memorable shortcut.
 - Quiz questions are never cached — always regenerated fresh.
 - Regenerating on request (user didn't like a result) bypasses the cache check and overwrites the existing entry for that input.
