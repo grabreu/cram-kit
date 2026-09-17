@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 
 
-def content_hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+def content_hash(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 CACHE_DIR = Path(".cache")

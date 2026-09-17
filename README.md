@@ -14,6 +14,12 @@ Python · ruff
 /cram-kit <path-to-file>
 ```
 
+Also accepts pasted text, a short topic phrase, or an image directly — no existing file needed:
+
+```shell
+/cram-kit Explain the water cycle
+```
+
 ## Development
 
 Requires Python 3.11+.
