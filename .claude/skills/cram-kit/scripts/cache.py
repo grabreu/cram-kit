@@ -7,7 +7,7 @@ def content_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-CACHE_DIR = Path(".cache")
+CACHE_DIR = Path(__file__).resolve().parent.parent / ".cache"
 
 
 def cache_path(digest: str) -> Path:

@@ -24,7 +24,7 @@ def cmd_check(input_path: Path) -> None:
     else:
         print(f"cache miss ({digest[:8]})")
         print(f"read {input_path}, generate summary + flashcards, then run:")
-        print(f"  python scripts/cram.py save {input_path} <json-file>")
+        print(f"  save {input_path} <json-file>")
 
 
 def cmd_save(input_path: Path, json_path: Path) -> None:

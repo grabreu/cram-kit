@@ -42,13 +42,16 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Source
 
 - `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
-- `scripts/cram.py` - CLI entry point with six subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz/activity generation), `quiz-save` (render a quiz recap HTML, never touches the cache), `activity-save` (render a practice activity HTML, never touches the cache), and `list` (print every cached study set's tag, input path, and generation date).
-- `scripts/cache.py` - content hashing and cache read/write.
-- `scripts/render.py` - HTML templating.
+- `.claude/skills/cram-kit/scripts/cram.py` - CLI entry point with six subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz/activity generation), `quiz-save` (render a quiz recap HTML, never touches the cache), `activity-save` (render a practice activity HTML, never touches the cache), and `list` (print every cached study set's tag, input path, and generation date).
+- `.claude/skills/cram-kit/scripts/cache.py` - content hashing and cache read/write.
+- `.claude/skills/cram-kit/scripts/render.py` - HTML templating.
+
+Scripts live *inside* the skill's own folder (not at the repo root) so the whole `.claude/skills/cram-kit/` folder is self-contained and can be copied to another project or to a personal Claude Code skills directory (`~/.claude/skills/cram-kit/`) without leaving anything behind.
 
 ### Architecture
 
 - This is a Claude Code skill, not a standalone app. Claude only generates new text on a cache miss or for quiz questions — it never re-derives already-cached content.
+- The current working directory when the skill runs is wherever the user's session happens to be, never assumed to be this repo. `SKILL.md` references the script as `${CLAUDE_SKILL_DIR}/scripts/cram.py` (a path Claude Code resolves to this skill's own folder), never a bare `scripts/cram.py`. `CACHE_DIR` in `cache.py` is likewise anchored to the script's own file location, not the working directory, so the cache travels with the skill wherever it's installed.
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
 - Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering. Also accepts pasted text or a short phrase directly (no existing file): Claude saves it as a file in the current working directory first, then proceeds the same way. An image pasted directly into the chat has no accessible source file, so it's transcribed to text instead of saved as-is — only an image given as an actual file path goes through the pipeline as an image.
 - `/cram-kit quiz <path-to-file>` (leading "quiz" keyword) triggers the quiz flow instead of summary/flashcards generation.
