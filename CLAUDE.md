@@ -42,7 +42,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Source
 
 - `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
-- `scripts/cram.py` - CLI entry point: reads the input file, checks the cache, writes the output HTML.
+- `scripts/cram.py` - CLI entry point with two subcommands: `check` (hash the input, render from cache on a hit, or report a miss) and `save` (write Claude-generated content to cache and render).
 - `scripts/cache.py` - content hashing and cache read/write.
 - `scripts/render.py` - HTML templating.
 
@@ -70,3 +70,4 @@ Run `ruff format --check .`, `ruff check .` before considering a change done —
 
 - TODO: HTML/CSS print template design
 - TODO: how the kids actually access/run this (Claude Code terminal vs. Claude app)
+- TODO: allow passing generation style guidance (e.g. "be more direct", "more detailed") alongside the path — the cache key is currently just the input's content hash, so this needs a decision on whether guidance busts the cache key or just bypasses the cache for that run
