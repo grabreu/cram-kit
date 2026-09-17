@@ -5,6 +5,10 @@ description: Turn study text/topics/images into a cached summary and flashcards,
 
 # Cram Kit
 
+## Locating the script
+
+Every command below uses `${CLAUDE_SKILL_DIR}/scripts/cram.py` — `${CLAUDE_SKILL_DIR}` is this skill's own folder, resolved by Claude Code before you see this text, regardless of where it's installed (project-scoped or a personal skills directory) or what the current working directory happens to be. Never substitute a plain `scripts/cram.py` — the current working directory when this skill runs is wherever the user's session is, not this folder.
+
 ## If you don't have a file path yet
 
 If invoked with pasted text, a short topic phrase, or an image instead of a file path:
@@ -21,9 +25,9 @@ The invocation may include a file path plus trailing guidance in the same messag
 
 ## Given a file path
 
-Run from the repo root:
+Run:
 
-    python scripts/cram.py check <path>
+    python ${CLAUDE_SKILL_DIR}/scripts/cram.py check <path>
 
 Note this works for image files too — the script only hashes bytes for the cache key, it never reads the file's content itself.
 
@@ -41,7 +45,7 @@ The script's output tells you a `save` command is needed next. To produce it:
    - `flashcards`: a list of `{"front": ..., "back": ...}` question/answer pairs covering the summary's content.
    - `set_tag` (optional): a short tag identifying this study set, suggested from the content. Omit it if nothing sensible comes to mind — the script falls back to the filename.
 3. Write that as JSON to a temporary file, e.g. `{"summary": {...}, "flashcards": [...], "set_tag": "..."}`.
-4. Run the exact `save` command the script printed, with that JSON file's path as the second argument.
+4. Run `save` with the input path and that JSON file's path (using `${CLAUDE_SKILL_DIR}/scripts/cram.py` as above, same as `check`).
 5. Report the output HTML path back to the user.
 
 Never regenerate summary/flashcards for an input the script already reported as a cache hit.
@@ -57,7 +61,7 @@ If the invocation starts with the word "quiz" (e.g. `/cram-kit quiz <path>`, or 
 1. Resolve the input to a file path first: if there's no existing file, follow "If you don't have a file path yet" above using the content after "quiz". If there's an existing file, follow "Given a file path" above as normal (generate and cache summary/flashcards on a miss, same as any other invocation) — a quiz always needs a summary/flashcards to draw from.
 2. Once summary/flashcards exist (cached or freshly generated), load them:
 
-       python scripts/cram.py load <path>
+       python ${CLAUDE_SKILL_DIR}/scripts/cram.py load <path>
 
    This prints the cached `{"summary": ..., "flashcards": ..., "set_tag": ...}` as JSON — don't regenerate this content, just read it.
 3. Generate a set of quiz questions from that content (mix of multiple-choice, open-ended, and true/false, unless the user's extra instructions say otherwise — the same "extra instructions alongside a path" handling above applies here too). Work out the correct answer for each question yourself, but don't reveal any of them yet.
@@ -67,7 +71,7 @@ If the invocation starts with the word "quiz" (e.g. `/cram-kit quiz <path>`, or 
 5. After each answer: judge it (for open-ended answers, judge whether the meaning is close enough, not an exact string match), give brief feedback and the correct answer, then either move to the next question or, if the user has signaled they're done, proceed to the recap below.
 6. Once the quiz ends (count reached, or the user said to stop), write a JSON file capturing every question asked so far, shaped `{"questions": [{"type": ..., "question": ..., "options": [...], "correct_answer": ..., "user_answer": ..., "correct": true/false, "explanation": ...}, ...], "set_tag": ...}` (`options` only for multiple-choice, `explanation` optional), then run:
 
-       python scripts/cram.py quiz-save <path> <json-file>
+       python ${CLAUDE_SKILL_DIR}/scripts/cram.py quiz-save <path> <json-file>
 
 7. Report the quiz recap HTML path and a quick score summary (e.g. "4/6 correct") in chat.
 
@@ -88,7 +92,7 @@ If the invocation starts with the word "activity" (e.g. `/cram-kit activity <pat
    - **Subjective**: `{"type": "subjective", "title": ..., "instructions": ..., "stimulus": {"heading": ..., "meta": ..., "body": ...}, "prep_questions": [{"prompt": ..., "lines": 1}, ...], "structure_reminder": [{"label": ..., "description": ...}, ...], "writing_prompt": ..., "writing_lines": 14, "checklist": [...], "set_tag": ...}`. `stimulus` (a reading passage to react to), `prep_questions` (guided questions before the main writing task), and `structure_reminder` (a label/description table of the expected structure) are all optional — include only what actually fits the task (a math-adjacent writing task might skip `stimulus` entirely, for example). `writing_prompt` and `checklist` are the only required fields beyond `title`.
 4. Write that JSON to a temporary file, then run:
 
-       python scripts/cram.py activity-save <path> <json-file>
+       python ${CLAUDE_SKILL_DIR}/scripts/cram.py activity-save <path> <json-file>
 
 5. Report the output HTML path back to the user. For a subjective activity, also mention that it has no answer key and offer to review what they write once they're done (a real person or an AI review is what grades it, not this script).
 
@@ -96,8 +100,8 @@ Activities are never cached — `activity-save` doesn't touch `.cache/` at all, 
 
 ## List
 
-If the invocation is exactly the word "list" (e.g. `/cram-kit list`), run from the repo root:
+If the invocation is exactly the word "list" (e.g. `/cram-kit list`), run:
 
-    python scripts/cram.py list
+    python ${CLAUDE_SKILL_DIR}/scripts/cram.py list
 
 This prints every cached study set — Set tag, input file path, and the date it was generated — one per line. No input to resolve, no generation, no caching involved. Report the results back to the user as a readable list; if it prints "no study sets generated yet," say so plainly rather than treating it as an error.
