@@ -33,6 +33,12 @@ For a printable practice worksheet instead, add `activity` — math-style exerci
 /cram-kit activity <path-to-file>
 ```
 
+To see what's already been generated:
+
+```shell
+/cram-kit list
+```
+
 ## Development
 
 Requires Python 3.11+.

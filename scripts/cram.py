@@ -1,8 +1,9 @@
 import argparse
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
-from cache import content_hash, read_cache, write_cache
+from cache import content_hash, list_cache, read_cache, write_cache
 from render import render_activity_html, render_html, render_quiz_html
 
 
@@ -34,9 +35,25 @@ def cmd_save(input_path: Path, json_path: Path) -> None:
         "summary": generated["summary"],
         "flashcards": generated["flashcards"],
         "set_tag": generated.get("set_tag") or input_path.stem,
+        "input_path": str(input_path.resolve()),
+        "generated_at": datetime.now(UTC).date().isoformat(),
     }
     write_cache(digest, data)
     _render_and_write(input_path, data)
+
+
+def cmd_list() -> None:
+    entries = list_cache()
+
+    if not entries:
+        print("no study sets generated yet")
+        return
+
+    for entry in entries:
+        set_tag = entry.get("set_tag", "?")
+        input_path = entry.get("input_path", "?")
+        generated_at = entry.get("generated_at", "?")
+        print(f"{set_tag} - {input_path} (generated {generated_at})")
 
 
 def cmd_load(input_path: Path) -> None:
@@ -93,6 +110,8 @@ def main() -> None:
     activity_save_parser.add_argument("input_path", type=Path)
     activity_save_parser.add_argument("json_path", type=Path)
 
+    subparsers.add_parser("list")
+
     args = parser.parse_args()
 
     if args.command == "check":
@@ -103,8 +122,10 @@ def main() -> None:
         cmd_load(args.input_path)
     elif args.command == "quiz-save":
         cmd_quiz_save(args.input_path, args.json_path)
-    else:
+    elif args.command == "activity-save":
         cmd_activity_save(args.input_path, args.json_path)
+    else:
+        cmd_list()
 
 
 if __name__ == "__main__":
