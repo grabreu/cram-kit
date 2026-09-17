@@ -55,6 +55,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Caching
 
 - Summary and flashcards are generated together in the same pass and cached, keyed by the input's content hash.
+- Summary shape: `{title, sections: [{heading, body, tip?}]}` — `tip` is optional per section, only included where there's an actual memorable shortcut.
 - Quiz questions are never cached — always regenerated fresh.
 
 ### Content & Tooling
@@ -68,6 +69,5 @@ Run `ruff format --check .`, `ruff check .` before considering a change done —
 
 ### Open Questions
 
-- TODO: HTML/CSS print template design
 - TODO: how the kids actually access/run this (Claude Code terminal vs. Claude app)
 - TODO: allow passing generation style guidance (e.g. "be more direct", "more detailed") alongside the path — the cache key is currently just the input's content hash, so this needs a decision on whether guidance busts the cache key or just bypasses the cache for that run
