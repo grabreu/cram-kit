@@ -104,6 +104,47 @@ body {
   border-left: 1px dashed #999;
   margin: 4mm 0;
 }
+.quiz-score {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 4mm;
+}
+.quiz-item {
+  margin-bottom: 4mm;
+  padding: 3mm;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  page-break-inside: avoid;
+}
+.quiz-item.correct {
+  border-color: #2e7d4f;
+  background: #eaf6ef;
+}
+.quiz-item.incorrect {
+  border-color: #b3261e;
+  background: #fbeceb;
+}
+.quiz-type {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #999;
+  text-transform: uppercase;
+}
+.quiz-question {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 1mm 0 2mm 0;
+}
+.quiz-answer-line {
+  font-size: 11px;
+  margin: 0 0 1mm 0;
+}
+.quiz-explanation {
+  font-size: 10px;
+  color: #555;
+  margin: 1mm 0 0 0;
+}
+
 @media print {
   body { background: #fff; }
   .page, .cards-page {
@@ -151,6 +192,50 @@ def _render_cards_pages(flashcards: list[dict], set_tag: str) -> str:
         cards[i : i + CARDS_PER_PAGE] for i in range(0, len(cards), CARDS_PER_PAGE)
     ]
     return "\n".join(f'<div class="cards-page">{"".join(page)}</div>' for page in pages)
+
+
+def _render_quiz_item(item: dict) -> str:
+    status = "correct" if item["correct"] else "incorrect"
+    question = html.escape(item["question"])
+    qtype = html.escape(item["type"])
+    lines = [f'<div class="quiz-item {status}">']
+    lines.append(f'<div class="quiz-type">{qtype}</div>')
+    lines.append(f'<div class="quiz-question">{question}</div>')
+    lines.append(
+        f'<p class="quiz-answer-line">Your answer: {html.escape(item["user_answer"])}</p>'
+    )
+    lines.append(
+        f'<p class="quiz-answer-line">Correct answer: {html.escape(item["correct_answer"])}</p>'
+    )
+    explanation = item.get("explanation")
+    if explanation:
+        lines.append(f'<p class="quiz-explanation">{html.escape(explanation)}</p>')
+    lines.append("</div>")
+    return "\n".join(lines)
+
+
+def render_quiz_html(questions: list[dict], set_tag: str) -> str:
+    title = html.escape(f"{set_tag} — Quiz Results")
+    correct_count = sum(1 for q in questions if q["correct"])
+    score = f"Score: {correct_count}/{len(questions)}"
+    items_html = "\n".join(_render_quiz_item(q) for q in questions)
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{title}</title>
+<style>{_STYLE}</style>
+</head>
+<body>
+<div class="page">
+<h1 class="title">{title}</h1>
+<p class="quiz-score">{score}</p>
+{items_html}
+</div>
+</body>
+</html>
+"""
 
 
 def render_html(summary: dict, flashcards: list[dict], set_tag: str) -> str:
