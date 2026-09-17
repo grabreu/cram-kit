@@ -2,7 +2,7 @@
 
 ## Repository
 
-A Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML. Read `README.md` before making changes — it documents the project pitch and usage.
+A Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML. Read `README.md` before making changes — it documents the project pitch and usage. Read `docs/architecture.md` for the domain model and the check/save flow. Significant, hard-to-reverse decisions are recorded in `docs/adr/` — check it before revisiting one, and add an entry when making a new one.
 
 ## General Rules
 
