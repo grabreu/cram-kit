@@ -144,6 +144,76 @@ body {
   color: #555;
   margin: 1mm 0 0 0;
 }
+.activity-instructions {
+  font-size: 11px;
+  color: #2e7d4f;
+  background: #eaf6ef;
+  border: 0.5px solid #2e7d4f;
+  border-radius: 3px;
+  padding: 2mm 3mm;
+  margin: 0 0 4mm 0;
+}
+.exercise {
+  margin-bottom: 4mm;
+  page-break-inside: avoid;
+}
+.exercise-number {
+  font-weight: bold;
+}
+.write-lines {
+  margin: 2mm 0;
+}
+.write-line {
+  border-bottom: 1px solid #ccc;
+  height: 7mm;
+}
+.answer-key-item {
+  font-size: 11px;
+  margin: 0 0 1mm 0;
+}
+.answer-key-section {
+  page-break-before: always;
+}
+.stimulus-box {
+  border: 1px solid #2e5090;
+  border-radius: 3px;
+  padding: 3mm 4mm;
+  margin: 0 0 4mm 0;
+  page-break-inside: avoid;
+}
+.stimulus-heading {
+  font-weight: bold;
+  color: #2e5090;
+  margin: 0 0 1mm 0;
+}
+.stimulus-meta {
+  font-size: 9px;
+  color: #999;
+  margin: 0 0 2mm 0;
+}
+.prep-question {
+  margin-bottom: 3mm;
+}
+.structure-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  margin: 0 0 4mm 0;
+}
+.structure-table td {
+  border: 1px solid #ccc;
+  padding: 1.5mm 2mm;
+  vertical-align: top;
+}
+.structure-label {
+  font-weight: bold;
+  background: #eaf0fb;
+  white-space: nowrap;
+}
+.checklist-item {
+  font-size: 11px;
+  margin: 0 0 1.5mm 0;
+}
 
 @media print {
   body { background: #fff; }
@@ -232,6 +302,144 @@ def render_quiz_html(questions: list[dict], set_tag: str) -> str:
 <h1 class="title">{title}</h1>
 <p class="quiz-score">{score}</p>
 {items_html}
+</div>
+</body>
+</html>
+"""
+
+
+def _render_write_lines(count: int) -> str:
+    lines = "\n".join('<div class="write-line"></div>' for _ in range(count))
+    return f'<div class="write-lines">{lines}</div>'
+
+
+def _render_exercise(exercise: dict) -> str:
+    number = html.escape(str(exercise["number"]))
+    prompt = html.escape(exercise["prompt"])
+    lines = _render_write_lines(exercise.get("lines", 2))
+    return (
+        f'<div class="exercise"><p><span class="exercise-number">{number}.</span> '
+        f"{prompt}</p>{lines}</div>"
+    )
+
+
+def _render_objective_section(section: dict) -> str:
+    heading = html.escape(section["heading"])
+    exercises_html = "\n".join(_render_exercise(e) for e in section["exercises"])
+    return f'<div class="section"><h2>{heading}</h2>{exercises_html}</div>'
+
+
+def _render_answer_key(answer_key: list[dict]) -> str:
+    items = "\n".join(
+        f'<p class="answer-key-item"><strong>{html.escape(str(a["number"]))}.</strong> '
+        f"{html.escape(a['answer'])}</p>"
+        for a in answer_key
+    )
+    return f'<div class="section answer-key-section"><h2>Answer Key</h2>{items}</div>'
+
+
+def _render_objective_activity(activity: dict) -> str:
+    parts = []
+    instructions = activity.get("instructions")
+    if instructions:
+        parts.append(
+            f'<p class="activity-instructions">{html.escape(instructions)}</p>'
+        )
+    parts.extend(_render_objective_section(s) for s in activity["sections"])
+    parts.append(_render_answer_key(activity["answer_key"]))
+    return "\n".join(parts)
+
+
+def _render_stimulus(stimulus: dict) -> str:
+    heading = html.escape(stimulus["heading"])
+    meta = stimulus.get("meta")
+    meta_html = f'<p class="stimulus-meta">{html.escape(meta)}</p>' if meta else ""
+    body = html.escape(stimulus["body"])
+    return (
+        f'<div class="stimulus-box"><p class="stimulus-heading">{heading}</p>'
+        f"{meta_html}<p>{body}</p></div>"
+    )
+
+
+def _render_prep_question(question: dict) -> str:
+    prompt = html.escape(question["prompt"])
+    lines = _render_write_lines(question.get("lines", 1))
+    return f'<div class="prep-question"><p>{prompt}</p>{lines}</div>'
+
+
+def _render_structure_table(rows: list[dict]) -> str:
+    rows_html = "\n".join(
+        f'<tr><td class="structure-label">{html.escape(r["label"])}</td>'
+        f"<td>{html.escape(r['description'])}</td></tr>"
+        for r in rows
+    )
+    return f'<table class="structure-table">{rows_html}</table>'
+
+
+def _render_checklist(items: list[str]) -> str:
+    items_html = "\n".join(
+        f'<p class="checklist-item">☐ {html.escape(item)}</p>' for item in items
+    )
+    return f'<div class="section"><h2>Checklist</h2>{items_html}</div>'
+
+
+def _render_subjective_activity(activity: dict) -> str:
+    parts = []
+    instructions = activity.get("instructions")
+    if instructions:
+        parts.append(
+            f'<p class="activity-instructions">{html.escape(instructions)}</p>'
+        )
+
+    stimulus = activity.get("stimulus")
+    if stimulus:
+        parts.append(_render_stimulus(stimulus))
+
+    prep_questions = activity.get("prep_questions")
+    if prep_questions:
+        questions_html = "\n".join(_render_prep_question(q) for q in prep_questions)
+        parts.append(
+            f'<div class="section"><h2>Before You Write</h2>{questions_html}</div>'
+        )
+
+    structure = activity.get("structure_reminder")
+    if structure:
+        parts.append(
+            f'<div class="section"><h2>Structure Reminder</h2>'
+            f"{_render_structure_table(structure)}</div>"
+        )
+
+    writing_prompt = html.escape(activity["writing_prompt"])
+    writing_lines = _render_write_lines(activity.get("writing_lines", 14))
+    parts.append(
+        f'<div class="section"><h2>Your Turn</h2><p>{writing_prompt}</p>{writing_lines}</div>'
+    )
+
+    checklist = activity.get("checklist")
+    if checklist:
+        parts.append(_render_checklist(checklist))
+
+    return "\n".join(parts)
+
+
+def render_activity_html(activity: dict) -> str:
+    title = html.escape(activity["title"])
+    if activity["type"] == "objective":
+        body_html = _render_objective_activity(activity)
+    else:
+        body_html = _render_subjective_activity(activity)
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{title}</title>
+<style>{_STYLE}</style>
+</head>
+<body>
+<div class="page">
+<h1 class="title">{title}</h1>
+{body_html}
 </div>
 </body>
 </html>
