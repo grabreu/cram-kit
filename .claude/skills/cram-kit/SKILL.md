@@ -1,6 +1,6 @@
 ---
 name: cram-kit
-description: Turn study text/topics/images into a cached summary and flashcards, or an interactive quiz, as printable HTML. Invoke as `/cram-kit <path-to-file>` (or `/cram-kit quiz <path-to-file>`), or with pasted text, a short phrase, or an image directly.
+description: Turn study text/topics/images into a cached summary and flashcards, an interactive quiz, or a printable practice activity, as HTML. Invoke as `/cram-kit <path-to-file>` (or `/cram-kit quiz <path-to-file>`, or `/cram-kit activity <path-to-file>`), or with pasted text, a short phrase, or an image directly.
 ---
 
 # Cram Kit
@@ -72,3 +72,24 @@ If the invocation starts with the word "quiz" (e.g. `/cram-kit quiz <path>`, or 
 7. Report the quiz recap HTML path and a quick score summary (e.g. "4/6 correct") in chat.
 
 Quiz results are never cached — `quiz-save` doesn't touch `.cache/` at all, only `check`/`save` do.
+
+## Activity
+
+If the invocation starts with the word "activity" (e.g. `/cram-kit activity <path>`, or "activity" plus pasted text/phrase/image), generate a printable practice worksheet instead of the normal summary/flashcards flow or the interactive quiz.
+
+1. Resolve the input and ensure summary/flashcards exist, same as the "Quiz" section above (steps 1-2: materialize/`check`/`save` if needed, then `load <path>` to read the cached content).
+2. Decide which kind of activity fits what's being asked for:
+   - **Objective** — the material has exercises with objectively verifiable answers (math problems, fill-in-the-blank, calculations, conversions). Include an answer key.
+   - **Subjective** — the request is an open-ended production task (write an essay, a letter, a paragraph, an opinion piece). No answer key is possible here — a real person (or a separate AI review) has to read and judge it, not this script.
+
+   This is a judgment call based on the content/request, not something the user has to specify — but if their extra instructions say which kind they want, follow that instead.
+3. Generate the activity JSON, shaped by type:
+   - **Objective**: `{"type": "objective", "title": ..., "instructions": ..., "sections": [{"heading": ..., "exercises": [{"number": 1, "prompt": ..., "lines": 2}, ...]}, ...], "answer_key": [{"number": 1, "answer": ...}, ...], "set_tag": ...}`. `instructions` is an optional short intro line. `lines` on an exercise is how many ruled lines to leave for working it out (omit for a sane default). Number exercises sequentially across all sections; `answer_key` must cover every exercise number.
+   - **Subjective**: `{"type": "subjective", "title": ..., "instructions": ..., "stimulus": {"heading": ..., "meta": ..., "body": ...}, "prep_questions": [{"prompt": ..., "lines": 1}, ...], "structure_reminder": [{"label": ..., "description": ...}, ...], "writing_prompt": ..., "writing_lines": 14, "checklist": [...], "set_tag": ...}`. `stimulus` (a reading passage to react to), `prep_questions` (guided questions before the main writing task), and `structure_reminder` (a label/description table of the expected structure) are all optional — include only what actually fits the task (a math-adjacent writing task might skip `stimulus` entirely, for example). `writing_prompt` and `checklist` are the only required fields beyond `title`.
+4. Write that JSON to a temporary file, then run:
+
+       python scripts/cram.py activity-save <path> <json-file>
+
+5. Report the output HTML path back to the user. For a subjective activity, also mention that it has no answer key and offer to review what they write once they're done (a real person or an AI review is what grades it, not this script).
+
+Activities are never cached — `activity-save` doesn't touch `.cache/` at all, and re-running produces a fresh set of exercises/prompts each time, same reasoning as quiz.

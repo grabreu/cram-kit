@@ -2,7 +2,7 @@
 
 ## Repository
 
-A Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML. Read `README.md` before making changes — it documents the project pitch and usage. Read `docs/architecture.md` for the domain model and the check/save flow. Significant, hard-to-reverse decisions are recorded in `docs/adr/` — check it before revisiting one, and add an entry when making a new one.
+A Claude Code skill that turns study text/topics into cached summaries, flashcards, quizzes, and printable practice activities as HTML. Read `README.md` before making changes — it documents the project pitch and usage. Read `docs/architecture.md` for the domain model and the check/save flow. Significant, hard-to-reverse decisions are recorded in `docs/adr/` — check it before revisiting one, and add an entry when making a new one.
 
 ## General Rules
 
@@ -42,7 +42,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 ### Source
 
 - `.claude/skills/cram-kit/SKILL.md` - the instructions Claude follows when invoked.
-- `scripts/cram.py` - CLI entry point with four subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz generation), and `quiz-save` (render a quiz recap HTML, never touches the cache).
+- `scripts/cram.py` - CLI entry point with five subcommands: `check` (hash the input, render from cache on a hit, or report a miss), `save` (write Claude-generated content to cache and render), `load` (print the cached summary/flashcards as JSON, for quiz/activity generation), `quiz-save` (render a quiz recap HTML, never touches the cache), and `activity-save` (render a practice activity HTML, never touches the cache).
 - `scripts/cache.py` - content hashing and cache read/write.
 - `scripts/render.py` - HTML templating.
 
@@ -52,6 +52,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - No separate LLM API/account: generation happens inside the Claude Code/Claude.ai session already running. Do not add an API client or SDK for a third-party LLM provider.
 - Invoked explicitly as `/cram-kit <path-to-file>` — no natural-language auto-triggering. Also accepts pasted text or a short phrase directly (no existing file): Claude saves it as a file in the current working directory first, then proceeds the same way. An image pasted directly into the chat has no accessible source file, so it's transcribed to text instead of saved as-is — only an image given as an actual file path goes through the pipeline as an image.
 - `/cram-kit quiz <path-to-file>` (leading "quiz" keyword) triggers the quiz flow instead of summary/flashcards generation.
+- `/cram-kit activity <path-to-file>` (leading "activity" keyword) triggers a printable practice activity instead.
 
 ### Caching
 
@@ -69,6 +70,13 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - No fixed question count or natural end: continues until a user-requested count is reached or the user says to stop. Once distinct facts run out, later questions rephrase the same facts differently rather than ending — repeated exposure is the intent of "cram," not a flaw.
 - Never cached — regenerated fresh every time, and `quiz-save` doesn't touch `.cache/` at all.
 - After the last question, a recap HTML (`<set_tag>-quiz.html`) is written: every question, the user's answer, the correct answer, and whether they got it right — this is the answer-key equivalent for quiz, produced after the fact rather than upfront.
+
+### Activity
+
+- A printable practice worksheet — static HTML like summary/flashcards, not interactive like quiz. Drawn from the existing cached summary/flashcards, same prerequisite as quiz.
+- Two kinds, decided by Claude's judgment based on the content/request (not something the user has to specify): **objective** (verifiable answers — math, fill-in-the-blank, calculations) gets an answer key as the last section; **subjective** (open-ended production — an essay, a letter) gets no answer key, since grading it requires a real person or a separate AI review, not this script.
+- Subjective activities may optionally include a reading stimulus, guided prep questions, and a structure reminder — only whichever of those actually fits the task, none are mandatory beyond a title, writing prompt, and checklist.
+- Never cached — regenerated fresh every time, and `activity-save` doesn't touch `.cache/` at all, same reasoning as quiz (more practice material each time, not a fixed worksheet).
 
 ### Content & Tooling
 

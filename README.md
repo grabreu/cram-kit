@@ -3,7 +3,7 @@
 [![CI](https://github.com/grabreu/cram-kit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/grabreu/cram-kit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/grabreu/cram-kit?style=flat-square)](LICENSE)
 
-Claude Code skill that turns study text/topics into cached summaries, flashcards, and quizzes as printable HTML.
+Claude Code skill that turns study text/topics into cached summaries, flashcards, quizzes, and printable practice activities as HTML.
 
 ## Tech stack
 
@@ -25,6 +25,12 @@ For a quiz instead of a summary, add `quiz` — an interactive, one-question-at-
 
 ```shell
 /cram-kit quiz <path-to-file>
+```
+
+For a printable practice worksheet instead, add `activity` — math-style exercises get an answer key at the end, open-ended writing tasks (an essay, a letter) don't, since those need a person or a separate AI review to grade:
+
+```shell
+/cram-kit activity <path-to-file>
 ```
 
 ## Development
