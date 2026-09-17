@@ -19,10 +19,10 @@ The script's output tells you a `save` command is needed next. To produce it:
 
 1. Read the input file yourself.
 2. Generate:
-   - `summary`: an organized summary of the content, structured with headings. The input may be freeform text or just a list of topics — organize it, don't just repeat it back.
+   - `summary`: `{"title": ..., "sections": [{"heading": ..., "body": ..., "tip": ...}, ...]}`. The input may be freeform text or just a list of topics — organize it into sections, don't just repeat it back. Keep each section's `body` scannable for a student studying it, not a dense wall of text. `tip` is optional per section — only include one where there's an actual short, memorable shortcut or mnemonic; omit the key entirely otherwise, don't force one.
    - `flashcards`: a list of `{"front": ..., "back": ...}` question/answer pairs covering the summary's content.
    - `set_tag` (optional): a short tag identifying this study set, suggested from the content. Omit it if nothing sensible comes to mind — the script falls back to the filename.
-3. Write that as JSON to a temporary file, e.g. `{"summary": "...", "flashcards": [...], "set_tag": "..."}`.
+3. Write that as JSON to a temporary file, e.g. `{"summary": {...}, "flashcards": [...], "set_tag": "..."}`.
 4. Run the exact `save` command the script printed, with that JSON file's path as the second argument.
 5. Report the output HTML path back to the user.
 
