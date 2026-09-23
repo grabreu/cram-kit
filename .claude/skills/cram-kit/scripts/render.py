@@ -285,7 +285,7 @@ def _render_quiz_item(item: dict) -> str:
 
 
 def render_quiz_html(questions: list[dict], set_tag: str) -> str:
-    title = html.escape(f"{set_tag} — Quiz Results")
+    title = html.escape(f"{set_tag} - Quiz Results")
     correct_count = sum(1 for q in questions if q["correct"])
     score = f"Score: {correct_count}/{len(questions)}"
     items_html = "\n".join(_render_quiz_item(q) for q in questions)
