@@ -15,19 +15,19 @@ Python · ruff
 /cram-kit <path-to-file>
 ```
 
-Also accepts pasted text, a short topic phrase, or an image directly — no existing file needed:
+Also accepts pasted text, a short topic phrase, or an image directly, with no existing file needed:
 
 ```shell
 /cram-kit Explain the water cycle
 ```
 
-For a quiz instead of a summary, add `quiz` — an interactive, one-question-at-a-time session in chat, with a printable recap (score + answer key) written at the end:
+For a quiz instead of a summary, add `quiz`: an interactive, one-question-at-a-time session in chat, with a printable recap (score + answer key) written at the end:
 
 ```shell
 /cram-kit quiz <path-to-file>
 ```
 
-For a printable practice worksheet instead, add `activity` — math-style exercises get an answer key at the end, open-ended writing tasks (an essay, a letter) don't, since those need a person or a separate AI review to grade:
+For a printable practice worksheet instead, add `activity`: math-style exercises get an answer key at the end, open-ended writing tasks (an essay, a letter) don't, since those need a person or a separate AI review to grade:
 
 ```shell
 /cram-kit activity <path-to-file>
